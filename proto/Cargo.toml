@@ -1,0 +1,9 @@
+[package]
+name = "proto"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+zbus.workspace = true
+serde.workspace = true
+clap.workspace = true

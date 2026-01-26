@@ -1,0 +1,17 @@
+[workspace]
+resolver = "2"
+
+members = [
+  "switcherd",
+  "switcher-cli",
+  "proto"
+]
+
+[workspace.dependencies]
+proto = { path = "./proto" }
+
+color-eyre = "0.6.5"
+tokio = { version = "1.49.0", features = [ "full" ] }
+zbus = { version = "5.13.2", features = [ "tokio" ] }
+serde = { version = "1.0.228" }
+clap = { version = "4.5.54", features = [ "derive" ] }

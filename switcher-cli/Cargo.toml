@@ -1,0 +1,11 @@
+[package]
+name = "switcher-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+color-eyre.workspace = true
+zbus.workspace = true
+proto.workspace = true
+tokio.workspace = true
+clap.workspace = true
