@@ -116,8 +116,8 @@ enum DriverType {
 
 impl GpuSwitcher {
     const NVIDIA_DRIVERS: [&str; 5] = [
-        "nvidia_drm",
         "nvidia_uvm",
+        "nvidia_drm",
         "nvidia_modeset",
         "nvidia",
         "nvidia-wmi-ec-backlight",
@@ -555,7 +555,7 @@ impl GpuSwitcher {
             }
             DriverType::Nvidia => {
                 let mut modprobe = Command::new("modprobe");
-                let modprobe = modprobe.arg("nvidia_drm");
+                let modprobe = modprobe.arg("nvidia_drm").arg("nvidia_uvm");
                 let status = modprobe
                     .status()
                     .await
