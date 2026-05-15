@@ -536,16 +536,15 @@ impl GpuSwitcher {
             DriverType::Vfio => {
                 let mut modprobe = Command::new("modprobe");
                 let modprobe = modprobe.arg("vfio_pci");
-                let status = modprobe
-                    .status()
-                    .await
-                    .map_err(SwitchDriversError::DriverLoad)?;
+                let status = modprobe.status().await.map_err(|e| {
+                    SwitchDriversError::DriverLoad("vfio_pci".to_string().into_boxed_str(), e)
+                })?;
 
                 if !status.success() {
-                    return Err(SwitchDriversError::DriverLoad(io::Error::other(format!(
-                        "exit code {}",
-                        status.code().unwrap()
-                    ))));
+                    return Err(SwitchDriversError::DriverLoad(
+                        "vfio_pci".to_string().into_boxed_str(),
+                        io::Error::other(format!("exit code {}", status.code().unwrap())),
+                    ));
                 }
 
                 dedicated_gpu
@@ -555,17 +554,29 @@ impl GpuSwitcher {
             }
             DriverType::Nvidia => {
                 let mut modprobe = Command::new("modprobe");
-                let modprobe = modprobe.arg("nvidia_drm").arg("nvidia_uvm");
-                let status = modprobe
-                    .status()
-                    .await
-                    .map_err(SwitchDriversError::DriverLoad)?;
+                let modprobe = modprobe.arg("nvidia_drm");
+                let status = modprobe.status().await.map_err(|e| {
+                    SwitchDriversError::DriverLoad("nvidia_drm".to_string().into_boxed_str(), e)
+                })?;
 
                 if !status.success() {
-                    return Err(SwitchDriversError::DriverLoad(io::Error::other(format!(
-                        "exit code {}",
-                        status.code().unwrap()
-                    ))));
+                    return Err(SwitchDriversError::DriverLoad(
+                        "nvidia_drm".to_string().into_boxed_str(),
+                        io::Error::other(format!("exit code {}", status.code().unwrap())),
+                    ));
+                }
+
+                let mut modprobe = Command::new("modprobe");
+                let modprobe = modprobe.arg("nvidia_uvm");
+                let status = modprobe.status().await.map_err(|e| {
+                    SwitchDriversError::DriverLoad("nvidia_uvm".to_string().into_boxed_str(), e)
+                })?;
+
+                if !status.success() {
+                    return Err(SwitchDriversError::DriverLoad(
+                        "nvidia_uvm".to_string().into_boxed_str(),
+                        io::Error::other(format!("exit code {}", status.code().unwrap())),
+                    ));
                 }
             }
             DriverType::None => {}
@@ -680,8 +691,8 @@ enum SwitchDriversError {
     NoGpu,
     #[error("driver unload: {0:?}")]
     DriverUnload(#[from] UnloadDriverError),
-    #[error("driver load: {0:?}")]
-    DriverLoad(io::Error),
+    #[error("driver load {0}: {1:?}")]
+    DriverLoad(Box<str>, io::Error),
     #[error("driver bind: {0:?}")]
     DriverBind(io::Error),
 }
